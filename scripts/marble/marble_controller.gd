@@ -42,7 +42,7 @@ func _physics_process(delta: float) -> void:
     if is_instance_valid(target) and not target.eliminated:
         var offset: Vector2 = target.global_position - global_position
         if offset.length() > stats.attack_range:
-            var desired := offset.normalized() * physics_config.move_speed
+            var desired: Vector2 = offset.normalized() * physics_config.move_speed
             apply_central_force((desired - linear_velocity) * 5.0)
         elif attack_timer <= 0.0 and offset.length() <= stats.attack_range + target.stats.radius:
             target.receive_damage(stats.attack_damage)
