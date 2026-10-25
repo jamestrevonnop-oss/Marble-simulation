@@ -9,6 +9,7 @@ var arena := Rect2(42.0, 42.0, 1196.0, 636.0)
 var marbles: Array = []
 var paused := false
 var count_label: Label
+var next_marble_id := 1
 
 func _ready() -> void:
     randomize()
@@ -105,6 +106,7 @@ func reset_arena() -> void:
             marble.remove_from_group("marbles")
             marble.queue_free()
     marbles.clear()
+    next_marble_id = 1
     paused = false
     get_tree().paused = false
     for i in range(8):
@@ -116,6 +118,8 @@ func add_marble() -> void:
         return
     var marble = MarbleScript.new()
     marble.stats = StatsScript.new()
+    marble.display_name = "Marble %02d" % next_marble_id
+    next_marble_id += 1
     marble.physics_config = physics_config
     marble.arena = arena
     marble.marble_color = [
@@ -126,6 +130,11 @@ func add_marble() -> void:
     add_child(marble)
     marble.initialize()
     marbles.append(marble)
+    update_status()
+
+func on_marble_eliminated(marble: Node) -> void:
+    marbles.erase(marble)
+    marble.queue_free()
     update_status()
 
 func remove_marble() -> void:
@@ -145,11 +154,15 @@ func toggle_pause() -> void:
 func update_status() -> void:
     if not is_instance_valid(count_label):
         return
-    var active := 0
-    for marble in marbles:
-        if is_instance_valid(marble) and not marble.eliminated:
-            active += 1
-    count_label.text = "%s | %d/%d active" % ["PAUSED" if paused else "RUNNING", active, marbles.size()]
+    var active := marbles.size()
+    if active == 1:
+        count_label.text = "WINNER: %s" % marbles[0].display_name
+    elif active == 0:
+        count_label.text = "DRAW | No marbles remain"
+    else:
+        count_label.text = "%s | %d marbles remaining" % [
+            "PAUSED" if paused else "RUNNING", active
+        ]
 
 func _process(_delta: float) -> void:
     update_status()

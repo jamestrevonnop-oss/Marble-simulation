@@ -4,6 +4,7 @@ var stats
 var physics_config
 var arena: Rect2
 var marble_color := Color("#ef6c65")
+var display_name := "Marble"
 var target: Node2D
 var attack_timer := 0.0
 var eliminated := false
@@ -88,3 +89,5 @@ func receive_damage(amount: float) -> void:
         collision_layer = 0
         collision_mask = 0
         linear_velocity = Vector2.ZERO
+        if get_parent().has_method("on_marble_eliminated"):
+            get_parent().on_marble_eliminated(self)
